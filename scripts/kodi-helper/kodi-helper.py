@@ -166,6 +166,7 @@ query findScenes($filter: FindFilterType!, $scene_filter: SceneFilterType!) {
       id
       title
       path
+      url
       rating
       details
       date
@@ -222,20 +223,17 @@ def generateSTRM(scene):
     return scene["paths"]["stream"]
 
 def generateNFO(scene, args):
-    ret = """
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    ret = """<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <movie>
     <title>{title}</title>
-    <userrating>{rating}</userrating>
-    <plot>{details}</plot>
-    <uniqueid type="stash">{id}</uniqueid>
-    {tags}
+    <url>{url}</url>
+    <plot><![CDATA[{details}]]></plot>{performers}{tags}{genres}
     <premiered>{date}</premiered>
+    <uniqueid type="stash">{id}</uniqueid>
     <studio>{studio}</studio>
-    {performers}
+    <userrating>{rating}</userrating>
     {thumbs}
     {fanart}
-    {genres}
 </movie>
 """
     tags = ""
@@ -250,6 +248,10 @@ def generateNFO(scene, args):
     date = ""
     if scene["date"] != None:
         date = scene["date"]
+
+    url = ""
+    if scene["url"] != None:
+        url = scene["url"]
 
     studio = ""
     logo = ""
@@ -291,7 +293,7 @@ def generateNFO(scene, args):
         for g in args.genre:
             genres.append("<genre>{}</genre>".format(g))
 
-    ret = ret.format(title = getSceneTitle(scene), rating = rating, id = scene["id"], tags = tags, date = date, studio = studio, performers = performers, details = scene["details"] or "", thumbs = "\n".join(thumbs), fanart = fanart, genres = "\n".join(genres))
+    ret = ret.format(title = getSceneTitle(scene), rating = rating, id = scene["id"], tags = tags, date = date, url = url, studio = studio, performers = performers, details = scene["details"] or "", thumbs = "\n".join(thumbs), fanart = fanart, genres = "\n".join(genres))
 
     return ret
 
